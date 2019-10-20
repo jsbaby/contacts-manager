@@ -11,6 +11,15 @@ export const actions = {
 		addContact:  (ctx:any,e:any) => {
 			ctx.router.push('/contacts/add');
 		},
+		getSelectedId:(ctx:any,e:any) => {
+			ctx.selectedId = e.id;
+		},
+		viewContact:  (ctx:any,e:any) => {
+			ctx.router.push('/contacts/view/'+ctx.selectedContact.id);
+		},
+		editContact:  (ctx:any,e:any) => {
+			ctx.router.push('/contacts/edit/'+ctx.selectedContact.id);
+		},
 		saveContactAction:  (ctx:any,e:any) => {
 			ctx.newContact = e.newContact
 		},
@@ -21,6 +30,8 @@ export const actions = {
 		contactSelected: (ctx:any,e:any) =>{
 			ctx.selectedContact = e.contact
 		},
-		
+		updateContact: (ctx:any,e:any) =>{
+			ctx.selectedContact[e.name] = e.value;
+		},
 	}
 }

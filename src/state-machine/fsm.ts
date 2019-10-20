@@ -1,4 +1,4 @@
-import { getContacts, saveContact } from './promises';
+import { getContacts, saveContact, viewContact, updateContact } from './promises';
 import { Contact } from './../models/contact';
 
 import { Machine, send, assign } from "xstate";
@@ -8,8 +8,9 @@ export const machine = Machine({
 	initial: 'loadRoute',
 	context:{
 		contacts: new Array<Contact>(),
-		selectedContact: undefined,
+		selectedContact: new Contact(),
 		newContact: new Contact(),
+		selectedId:'',
 		router: {
 			push:(s:string)=>{}
 		},
@@ -25,7 +26,16 @@ export const machine = Machine({
 						ADD_CONTACT: {
 							target:'addContact',
 							actions:['saveRouter']
+						},
+						VIEW_CONTACT: {
+							target:'viewContact',
+							actions:['saveRouter','getSelectedId']
+						},
+						EDIT_CONTACT: {
+							target:'editContact',
+							actions:['saveRouter','getSelectedId']
 						}
+
 					}
 				},
 				loading:{
@@ -62,9 +72,15 @@ export const machine = Machine({
 							target:'addContact',
 							actions:['addContact']
 						},
-						VIEW_CONTACT: 'viewContact',
-						EDIT_CONTACT: 'editScreenLoaded',
-						DELETE_CONTACT: 'deleteContactTriggered'
+						VIEW_CONTACT: {
+							target: 'loadRoute',
+							actions:['viewContact']
+						},
+						EDIT_CONTACT: {
+							target: 'loadRoute',
+							actions:['editContact']
+						},
+						DELETE_CONTACT: 'deleteContact'
 					}
 				},
 				addContact:{
@@ -98,17 +114,73 @@ export const machine = Machine({
 							}
 				},
 				viewContact: {
-					on:{
-						BACK_BUTTON: 'loading'
+					invoke:{
+						id: 'viewContact',
+						src: (ctx:any,e:any)=>viewContact(ctx.selectedId),	
+						onError: {
+									target: 'failure',
+									actions: assign({ 
+										errorMessage: (ctx:any, e:any) =>  e.data.message
+									})
+								},
+						onDone: {
+								target: 'viewContactLoaded',
+								actions: assign({ selectedContact: (ctx: any, e:any) => e.data.data.contact}),
+						}
 					}
 				},
-				editScreenLoaded:{
-				on:{
-					EDIT_SAVE_BUTTON: 'loading',
-					BACK_BUTTON: 'loading'
-				}
+				viewContactLoaded:{
+					on:{
+						BACK_BUTTON:{
+							target:'exitToContactList',
+						}
+					}
 				},
-				deleteContactTriggered:{
+				editContact:{
+					invoke:{
+							id: 'editContact',
+							src: (ctx:any,e:any)=>viewContact(ctx.selectedId),	
+							onError: {
+										target: 'failure',
+										actions: assign({ 
+											errorMessage: (ctx:any, e:any) =>  e.data.message
+										})
+									},
+							onDone: {
+									target: 'editContactLoaded',
+									actions: assign({ selectedContact: (ctx: any, e:any) => e.data.data.contact}),
+							}
+						}
+				},
+				editContactLoaded:{
+					on:{
+						UPDATE_CONTACT:{
+							actions:['updateContact']
+						},
+						SAVE_EDIT_BUTTON:{
+							target: 'saveEdit'
+						},
+						BACK_BUTTON:{
+							target:'exitToContactList',
+						}
+					}
+				},
+				saveEdit:{
+					invoke:{
+								id: 'saveEdit',
+								src: (ctx:any, e:any) => updateContact(ctx.selectedContact),	
+								onError: {
+									target: 'failure',
+									actions: assign({ 
+										errorMessage: (ctx:any, e:any) =>  e.data.message
+									})
+								},
+								onDone: {
+									target: 'editContact'
+								}
+							}
+				},
+				deleteContact:{
 					on:{
 						DELETED: 'loading',
 						BACK_BUTTON: 'loading'

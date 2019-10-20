@@ -29,7 +29,7 @@ export const ADD_CONTACT = gql`
     }   
 `;
 
-export const EDIT_CONTACT = gql`
+export const UPDATE_CONTACT = gql`
   mutation($contact:InputContact){
     updateContact(contact:$contact){
         id

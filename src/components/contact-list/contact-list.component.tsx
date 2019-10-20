@@ -30,13 +30,13 @@ export const ContactList=(props:any,ctx:any)=>{
                       </Button>
                   </div>
                   <div>
-                    <Button disabled={!state.context.selectedContact} variant="contained" component="span" >
+                    <Button disabled={!state.context.selectedContact} onClick={()=> send('VIEW_CONTACT')}variant="contained" component="span" >
                       View
                     </Button>
                   </div>
                   
                   <div>
-                    <Button disabled={!state.context.selectedContact} variant="contained" component="span" >
+                    <Button disabled={!state.context.selectedContact} onClick={()=> send('EDIT_CONTACT')} variant="contained" component="span" >
                       Edit
                     </Button>
                   </div>
