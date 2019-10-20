@@ -1,0 +1,19 @@
+.contact-list{
+    width: 100%;
+    text-align: left;
+    margin: 0 auto;
+    height: 50vh;
+    border-style: solid;
+    border-width: 1px;
+    border-color: lightgray;
+    overflow: auto;
+    background-color: snow;
+}
+.contact-button-panel{
+    margin-top: 1rem;
+    width: 100%;
+}
+.contact-button-panel div{
+    display: inline;
+    margin: 5px;
+}
