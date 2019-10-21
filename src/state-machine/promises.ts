@@ -1,4 +1,4 @@
-import { ADD_CONTACT, VIEW_CONTACT, UPDATE_CONTACT } from './../queries/index';
+import { ADD_CONTACT, VIEW_CONTACT, UPDATE_CONTACT, DELETE_CONTACT } from './../queries/index';
 import {apolloClient} from '../utils/dbclient';
 import { GET_CONTACTS } from '../queries';
 import { Contact } from '../models/contact';
@@ -16,6 +16,9 @@ export const saveContact=  (ctx:any,e:any) => {
 }
 
 export const updateContact=  (contact:Contact) => {
-	console.log(contact)
     return apolloClient.mutate({mutation: UPDATE_CONTACT , variables:{contact: {id:contact.id, name:contact.name, email:contact.email}}});	
+}
+
+export const deleteContact=  (id:any) => {
+    return apolloClient.mutate({mutation: DELETE_CONTACT , variables:{id: id}});	
 }

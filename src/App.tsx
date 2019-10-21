@@ -23,8 +23,9 @@ class App extends Component {
           <XStateRouter config={routerMachineConfig}>
             <div className="App">
               <CssBaseline />
-              <h1 className="App-header">Contact Manager</h1>
+              
               <div className="App">
+                <h1 className="App-header">Contact Manager</h1>
                 <Switch>
                     <Route path="/" exact component={ContactList}/>
                     <Route path="/contacts/add"  component={ContactDetails} />

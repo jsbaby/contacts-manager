@@ -1,8 +1,18 @@
-import { getContacts, saveContact, viewContact, updateContact } from './promises';
+import { getContacts, saveContact, viewContact, updateContact, deleteContact } from './promises';
 import { Contact } from './../models/contact';
 
 import { Machine, send, assign } from "xstate";
-import {actions} from './actions'
+import {actions} from './actions';
+
+const isValidContact = (ctx:any,e:any) => {
+								var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+								const result = e.newContact.name !=='' && e.newContact.email!=='' && re.test(e.newContact.email);
+								if(result===false) ctx.errorMessage = 'Invalid input';
+								if(result===true) ctx.errorMessage = '';
+								return result;
+							}
+
+
 export const machine = Machine({
     id: 'ContactManagerApp',
 	initial: 'loadRoute',
@@ -14,7 +24,8 @@ export const machine = Machine({
 		router: {
 			push:(s:string)=>{}
 		},
-		errorMessage: undefined
+		errorMessage: '',
+		successMessage: ''
 	},
 	states: {
 				loadRoute:{
@@ -43,7 +54,7 @@ export const machine = Machine({
 								id: 'getContacts',
 								src: getContacts,	
 								onError: {
-									target: 'failure',
+									target: 'loading',
 									actions: assign({ 
 										errorMessage: (ctx:any, e:any) =>  e.data.message
 									})
@@ -80,16 +91,22 @@ export const machine = Machine({
 							target: 'loadRoute',
 							actions:['editContact']
 						},
-						DELETE_CONTACT: 'deleteContact'
+						DELETE_CONTACT: {
+							target: 'deleteContact',
+
+						}
 					}
 				},
 				addContact:{
 					on:{
-						SAVE_NEW_BUTTON: {
+						SAVE_NEW_BUTTON: [{
 							target:'saveContact',
-							actions: ['saveContactAction']
-
-						},
+							cond: isValidContact,
+							actions: ['saveContact','setSuccessMessage']
+						},{
+							target:'addContact',
+							actions: ['validationError']
+						}],
 						BACK_BUTTON:{
 							target:'exitToContactList',
 						}
@@ -103,7 +120,7 @@ export const machine = Machine({
 								id: 'saveContact',
 								src: saveContact,	
 								onError: {
-									target: 'failure',
+									target: 'saveContact',
 									actions: assign({ 
 										errorMessage: (ctx:any, e:any) =>  e.data.message
 									})
@@ -118,7 +135,7 @@ export const machine = Machine({
 						id: 'viewContact',
 						src: (ctx:any,e:any)=>viewContact(ctx.selectedId),	
 						onError: {
-									target: 'failure',
+									target: 'viewContact',
 									actions: assign({ 
 										errorMessage: (ctx:any, e:any) =>  e.data.message
 									})
@@ -141,7 +158,7 @@ export const machine = Machine({
 							id: 'editContact',
 							src: (ctx:any,e:any)=>viewContact(ctx.selectedId),	
 							onError: {
-										target: 'failure',
+										target: 'editContact',
 										actions: assign({ 
 											errorMessage: (ctx:any, e:any) =>  e.data.message
 										})
@@ -158,7 +175,8 @@ export const machine = Machine({
 							actions:['updateContact']
 						},
 						SAVE_EDIT_BUTTON:{
-							target: 'saveEdit'
+							target: 'saveEdit',
+							actions:['setSuccessMessage']
 						},
 						BACK_BUTTON:{
 							target:'exitToContactList',
@@ -170,7 +188,7 @@ export const machine = Machine({
 								id: 'saveEdit',
 								src: (ctx:any, e:any) => updateContact(ctx.selectedContact),	
 								onError: {
-									target: 'failure',
+									target: 'saveEdit',
 									actions: assign({ 
 										errorMessage: (ctx:any, e:any) =>  e.data.message
 									})
@@ -181,14 +199,24 @@ export const machine = Machine({
 							}
 				},
 				deleteContact:{
-					on:{
-						DELETED: 'loading',
-						BACK_BUTTON: 'loading'
+					invoke:{
+						id: 'deleteContact',
+						src: (ctx:any, e:any) => deleteContact(ctx.selectedContact.id),	
+						onError: {
+									target: 'deleteContact',
+									actions: assign({ 
+										errorMessage: (ctx:any, e:any) =>  e.data.message
+									})
+						},
+						onDone: {
+									target: 'loadRoute',
+									actions:['loadContacts']
+								}
 					}
-				},
-				failure:{}
+				}
 			},
 		}
 ,
 actions
 );
+

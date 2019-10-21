@@ -7,24 +7,26 @@
     color: black;
 }
 .contact-details div{
-    width: 90%;
-    margin-left:1rem;
-
+    width: 100%;
 }
 .contact-details div input{
     width: 100%;
     margin-bottom: 0.5rem;
     text-align: left;
-    margin-left:1rem;
 }
-.contact-details div label{
-    margin-left:1rem;
-}
+
 .contact-btn-panel{
     text-align: center;
     margin-top: 1rem;
 }
 .contact-btn-panel div{
     display: inline;
+    margin-right: 1rem;
+}
+.snackar-error div{
+    background-color: red;
+}
+.snackar-success div{
+    background-color: green;
 
 }

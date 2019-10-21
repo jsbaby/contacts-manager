@@ -1,6 +1,7 @@
 import { ADD_CONTACT } from './../queries/index';
 import { useMutation } from 'react-apollo';
 import { send } from 'xstate';
+import { Contact } from '../models/contact';
 
 export const actions = {
 	actions:{
@@ -20,18 +21,29 @@ export const actions = {
 		editContact:  (ctx:any,e:any) => {
 			ctx.router.push('/contacts/edit/'+ctx.selectedContact.id);
 		},
-		saveContactAction:  (ctx:any,e:any) => {
-			ctx.newContact = e.newContact
+		saveContact:  (ctx:any,e:any) => {
+			ctx.newContact = e.newContact;
 		},
 		loadContacts: (ctx:any,e:any) => {
 			ctx.router.push('/');
 			send('LOAD_CONTACT_LIST',ctx.router);
+			ctx.selectedContact = new Contact();
+			ctx.successMessage = '';
+			ctx.errorMessage='';
+			ctx.selectedId='';
+			ctx.newContact= new Contact();
 		},
 		contactSelected: (ctx:any,e:any) =>{
 			ctx.selectedContact = e.contact
 		},
 		updateContact: (ctx:any,e:any) =>{
 			ctx.selectedContact[e.name] = e.value;
+		},
+		noteValidationError: (ctx:any,e:any) =>{
+			ctx.validationError = e;
+		},
+		setSuccessMessage:(ctx:any,e:any) =>{
+			ctx.successMessage = e.message;
 		},
 	}
 }

@@ -1,48 +1,45 @@
 import React from "react";
-import { GET_CONTACTS } from "../../queries";
-import { Query } from 'react-apollo';
 import { ContactListItem } from "../contact-list-item/contact-list-item.component";
-import { Link } from "react-router-dom";
 import { useMachine } from "@xstate/react";
 import { machine } from "../../state-machine/fsm";
-import { List, Button } from "@material-ui/core";
+import { Button, Icon } from "@material-ui/core";
 import './contact-list.component.css';
 import { Contact } from "../../models/contact";
-
+import AddIcon from '@material-ui/icons/Add';
+import PanoramaFishEye from '@material-ui/icons/PanoramaFishEye';
+import Create from '@material-ui/icons/Create';
+import Delete from '@material-ui/icons/Delete';
 export const ContactList=(props:any,ctx:any)=>{
     const [state,send,service] = useMachine(machine); 
     service.start();
     send('LOAD_CONTACT_LIST',{router:props.history});
-    console.log(state.context)
     return (
-            <div>
-              <List className="contact-list">
-                <ol>
+            <div className="contact-block">
+                <ol className="contact-list" >
                 {
-                  state.context.contacts.map((conatct:Contact) => ContactListItem(conatct,send))
+                  state.context.contacts.map((contact:Contact) => ContactListItem(contact,send))
                 }
                 </ol>
-              </List>
               <div className="contact-button-panel">
                   <div>
                       <Button variant="contained" component="span" onClick={()=> send('ADD_CONTACT')}>
-                        Add
+                        <AddIcon></AddIcon>&nbsp;Add
                       </Button>
                   </div>
                   <div>
-                    <Button disabled={!state.context.selectedContact} onClick={()=> send('VIEW_CONTACT')}variant="contained" component="span" >
-                      View
+                    <Button disabled={state.context.selectedContact.id===""} onClick={()=> send('VIEW_CONTACT')}variant="contained" component="span" >
+                      <PanoramaFishEye></PanoramaFishEye>&nbsp;View
                     </Button>
                   </div>
                   
                   <div>
-                    <Button disabled={!state.context.selectedContact} onClick={()=> send('EDIT_CONTACT')} variant="contained" component="span" >
-                      Edit
+                    <Button disabled={state.context.selectedContact.id===""} onClick={()=> send('EDIT_CONTACT')} variant="contained" component="span" >
+                      <Create></Create>&nbsp;Edit
                     </Button>
                   </div>
                   <div>
-                    <Button disabled={!state.context.selectedContact} variant="contained" component="span" >
-                      Delete
+                    <Button disabled={state.context.selectedContact.id===""} onClick={()=> send('DELETE_CONTACT')} variant="contained" component="span" >
+                      <Delete></Delete>&nbsp;Delete
                     </Button>
                   </div>
               </div>
